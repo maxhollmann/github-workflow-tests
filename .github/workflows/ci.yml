@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@master
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: maxhollmann/envlinks
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern=v{{version}},event=tag
+            type=semver,pattern=v{{major}},event=tag
+            type=semver,pattern=v{{major}}.{{minor}},event=tag
+            type=ref,event=pr
+
+      - name: Get all relevant tags
+        id: gettags
+        uses: jupyterhub/action-major-minor-tag-calculator@v1
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          prefix: "my-username/my-image-name:"
+          branchRegex: "^[^/]+$"
+
+      - name: Create parent version tags
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo v${{ steps.meta.outputs.major }}
+          echo v${{ steps.meta.outputs.major }}.${{ steps.meta.outputs.minor }}
+          echo ${{ steps.gettags.outputs.tags }}
+          echo ${{ join(fromJson(steps.gettags.outputs.tags)) }}
