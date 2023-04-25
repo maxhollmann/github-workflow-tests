@@ -50,6 +50,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           echo ${{ steps.gettags.outputs.tags }}
-          echo ${{ steps.meta.outputs.tags }}
-          echo ${{ steps.meta2.outputs.tags }}
+          echo ${{ join(fromJson(steps.meta.outputs.tags)) }}
+          echo ${{ join(fromJson(steps.meta2.outputs.tags)) }}
           echo ${{ join(fromJson(steps.gettags.outputs.tags)) }}
