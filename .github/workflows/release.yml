@@ -15,3 +15,4 @@ jobs:
           mode: bump
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-notes-prefix: "### Release Notes"
+          with-v: true
